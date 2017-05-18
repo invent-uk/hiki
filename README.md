@@ -59,4 +59,4 @@ Output files will be written to ./cctv by default with the hiearachy created at 
 
 | Make          | Model            | Resolution | Issues    |
 | ------------- |-------------     | -----------| ----------|
-| Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://www.amazon.co.uk/Hikvision-DS-2CD2142FWD-External-Network-Camera/dp/B017C4CCI4| 2688x1520 @20fps | None|
+| Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://www.amazon.co.uk/Hikvision-DS-2CD2142FWD-External-Network-Camera/dp/B017C4CCI4)| 2688x1520 @20fps | None|
