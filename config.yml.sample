@@ -1,0 +1,27 @@
+options:
+  path: ./cctv/
+  openRTSP: /usr/bin/openRTSP
+cameras:
+  driveway:
+    options:
+      host: 192.168.x.y
+      port: 80
+      user: admin
+      pass: password123
+      videoPath: /Streaming/channels/101
+      video_params: -b 1024000 -O -s 50 -4 -H -f 20
+      imagePath: /Streaming/channels/1/picture
+    record:
+        motion:
+          captureImage: true
+          symlinkImageLabel: -fanart
+          postDelay: 5
+          #postCommand: /usr/bin/ssh toaserver /and/run/a/command/afterwards.sh
+
+        constant:
+          schedule: 0 0,30 * * * *
+          captureImage: true
+          symlinkImageLabel: -fanart
+
+        image:
+          schedule: 0 0 * * * *

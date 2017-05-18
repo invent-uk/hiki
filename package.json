@@ -1,0 +1,14 @@
+{
+  "name": "hiki",
+  "version": "0.0.4",
+  "private": true,
+  "dependencies": {
+    "net-keepalive":"*",
+    "xml2js": "^0.4.16",
+    "request": "*",
+    "net-keepalive": "^0.3.3",
+    "cron": "*",
+    "mkdirp": "*",
+    "js-yaml": "*"
+  }
+}
