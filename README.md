@@ -49,9 +49,14 @@ Hiki is an NVR, but is very simple. It relies on the IP camera for the complicat
 - execute `./docker_run.sh` (Ctrl+C to exit)
 - execute `./docker_daemon.sh` to run in the background
 
+## Using Hiki
+
+Hiki will store output files in a logical hierarchy depending on the date, camera and type of recording. Each day is represented by its own directory under which will be each camera and type of recording. As such it is easy to apply different retention logic based on the kind of recording (continuous vs motion detect)
+
+Output files will be written to ./cctv by default with the hiearachy created at run-time. It is possible for hiki to execute a command once the recording is complete for use cases such as add the recording to Plex or push the recording up to the cloud.
 
 ## Supported cameras
 
 | Make          | Model            | Resolution | Issues    |
 | ------------- |-------------     | -----------| ----------|
-| Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://www.amazon.co.uk/Hikvision-DS-2CD2142FWD-External-Network-Camera/dp/B017C4CCI4)| 2688x1520 @20fps | None|
+| Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://www.amazon.co.uk/Hikvision-DS-2CD2142FWD-External-Network-Camera/dp/B017C4CCI4| 2688x1520 @20fps | None|
