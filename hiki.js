@@ -164,7 +164,7 @@ function startRecord(opt, cam, rec) {
 
   var options = cam.options;
   var args = options.video_params.split(/\s+/);
-  args.push(['-F', getTS(),
+  args.push([
   `rtsp://${options.user}:${options.pass}@${options.host}${options.videoPath}`
 ]);
 
