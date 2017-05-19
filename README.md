@@ -23,7 +23,7 @@ Hiki is different, it designed around the [KISS principle](https://en.wikipedia.
 
 ## Requirements
 
-- A Linux server
+- A Linux server or a system running docker
 - One or more recent [Hikvision](http://www.hikvision.co.uk/products_755.html) IPTV cameras
 - [nodejs](https://nodejs.org/en/)
 - [openRTSP](http://www.live555.com/openRTSP/) - Used to record the video streams
@@ -63,13 +63,15 @@ The additional jpg files are created to allow thumbnail to be displayed in the m
 
 ```cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01.mp4
 cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01.jpg
-cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01-fanart.jpg```
+cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01-fanart.jpg
+```
 
 The following files were created by a motion event, triggered by the Hikvision API. The recording will start on detection of motion and then complete a configurable number of seconds after stops being detected:
 
 ```cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01-fanart.jpg
 cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.mp4
-cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.jpg```
+cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.jpg
+```
 
 
 ## Supported cameras
