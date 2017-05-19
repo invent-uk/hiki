@@ -4,13 +4,13 @@
 
 Running a software CCTV NVR (Network Video Recorder) involves a lot of moving parts.
 
-Hiki is an NVR, but is very simple. It relies on the IP camera for the complicated stuff (motion detection, video configuration) and instead provides reliable recording of network video stream to disk.
+Hiki is different, it designed around the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle). It relies on the IP camera for the complicated stuff (motion detection, video configuration) and instead provides reliable recording of network video stream to disk.
 
 ## Benefits
 
 - Motion detection is handled by the camera, reducing workload on the server.
 - No transcoding of video is required, the native format is streamed to disk.
-- Keep control over your files, doesn't lock them away in a proprietary format.
+- Keeps control over your files, doesn't lock them away in a proprietary format.
 
 ## Features
 
@@ -24,10 +24,11 @@ Hiki is an NVR, but is very simple. It relies on the IP camera for the complicat
 ## Requirements
 
 - A Linux server
-- One or more recent Hikvision IPTV cameras
-- nodejs
-- openRTSP
-- A number of node modules, including node-hikvision-api
+- One or more recent [Hikvision](http://www.hikvision.co.uk/products_755.html) IPTV cameras
+- [nodejs](https://nodejs.org/en/)
+- [openRTSP](http://www.live555.com/openRTSP/) - Used to record the video streams
+- curl - Used to download images
+- [node-hikvision-api](https://github.com/nayrnet/node-hikvision-api) - Used to receive motion events from the camera
 
 ## Installation
 
@@ -54,6 +55,22 @@ Hiki is an NVR, but is very simple. It relies on the IP camera for the complicat
 Hiki will store output files in a logical hierarchy depending on the date, camera and type of recording. Each day is represented by its own directory under which will be each camera and type of recording. As such it is easy to apply different retention logic based on the kind of recording (continuous vs motion detect)
 
 Output files will be written to ./cctv by default with the hiearachy created at run-time. It is possible for hiki to execute a command once the recording is complete for use cases such as add the recording to Plex or push the recording up to the cloud.
+
+Example output:
+
+The following shows the output from a camera called 'driveway' that is using 24x7 recording.
+The additional jpg files are created to allow thumbnail to be displayed in the media library:
+
+```cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01.mp4
+cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01.jpg
+cctv/2017/05/18/driveway_constant/driveway_constant_20170518_2156_01-fanart.jpg```
+
+The following files were created by a motion event, triggered by the Hikvision API. The recording will start on detection of motion and then complete a configurable number of seconds after stops being detected:
+
+```cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01-fanart.jpg
+cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.mp4
+cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.jpg```
+
 
 ## Supported cameras
 
