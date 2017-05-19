@@ -15,7 +15,7 @@ Hiki is different, it designed around the [KISS principle](https://en.wikipedia.
 ## Features
 
 - 24x7 continuous recording (With configurable duration per file)
-- Simultaneous notion event driven recording
+- Simultaneous motion event driven recording
 - Scheduled image recording
 - Motion event driven image recording
 - Ability to trigger external commands on completion of motion event recording (For post processing or media library update)
