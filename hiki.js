@@ -103,7 +103,7 @@ function requestStopRecord(opt, cam, rec) {
 
 function fetchImage(opt, cam, rec) {
 
-  var datePath = getDatePath();
+  var datePath = getDT('path');
   var recPath = `${opt.outputPath}/${datePath}/${cam.title}_${rec.title}`;
   if (!rec.fullPath || recPath != rec.fullPath) {
     rec.fullPath = recPath;
@@ -111,7 +111,7 @@ function fetchImage(opt, cam, rec) {
       mkdirp.sync(rec.fullPath);
     }
   }
-  downloadImage(opt, cam, rec, `${rec.fullPath}/${cam.title}_${rec.title}_`+getTS(),'.jpg');
+  downloadImage(opt, cam, rec, `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.jpg`);
 }
 
 function downloadImage(opt, cam, rec, name, extension) {
@@ -152,8 +152,9 @@ function startRecord(opt, cam, rec) {
   if (rec.rtsp != null) {
     return;
   }
-  var datePath = getDatePath();
-  var recPath = `${opt.outputPath}/${datePath}/${cam.title}_${rec.title}`;
+  var datePath = getDT('path');
+  var relativePath=`${datePath}/${cam.title}_${rec.title}`;
+  var recPath = `${opt.outputPath}/${relativePath}`;
   if (!rec.fullPath || recPath != rec.fullPath) {
     rec.fullPath = recPath;
     if (!fs.existsSync(rec.fullPath)) {
@@ -168,19 +169,44 @@ function startRecord(opt, cam, rec) {
   `rtsp://${options.user}:${options.pass}@${options.host}${options.videoPath}`
 ]);
 
+var rec.videoFilename = `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.mp4`;
 rec.rtsp = spawn(opt.openRTSP, args,
   {
     cwd: opt.outputPath,
     stdio: [
       0, // Use parent's stdin for child
-      fs.openSync(`${rec.fullPath}/${cam.title}_${rec.title}_`+getTS()+'.mp4', 'w') ,
+      fs.openSync(rec.videoFilename, 'w') ,
       2 // Direct child's stderr to a file
     ]
   });
   debugLog(info, `Spawned RTSP child pid: ${rec.rtsp.pid}`);
   if (rec.captureImage != null && rec.captureImage == true) {
-    downloadImage(opt, cam, rec, `${rec.fullPath}/${cam.title}_${rec.title}_`+getTS(),'.jpg');
+    var imageFilename=`${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.jpg`;
+    downloadImage(opt, cam, rec, imageFilename);
   }
+  if (rec.postStartCommand) {
+      runCommand(opt, cam, rec, rec.PostStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
+  }
+
+  }
+}
+
+
+function runCommand(opt, cam, rec, command, fullPath, relativePath, filename) {
+
+  command = command.replace("%p", fullPath);
+  command = command.replace("%r", relativePath);
+  command = command.replace("%f", filename);
+
+  var pc = exec(,	function (error, stdout, stderr) {
+    if (error) {
+      debugLog(error, error.stack);
+      debugLog(error, 'Error code: '+error.code);
+      debugLog(error, 'Signal received: '+error.signal);
+    }
+    debugLog(info, 'Child Process STDOUT: '+stdout);
+    debugLog(info, 'Child Process STDERR: '+stderr);
+  });
 }
 
 function stopRecord(opt, cam, rec) {
@@ -188,18 +214,10 @@ function stopRecord(opt, cam, rec) {
     debugLog(info, `Stopping ${cam.title} - ${rec.title}`);
     rec.rtsp.kill('SIGUSR1');
     rec.rtsp = null;
-    if (rec.postCommand) {
-      var pc = exec(rec.postCommand,	function (error, stdout, stderr) {
-        if (error) {
-          debugLog(error, error.stack);
-          debugLog(error, 'Error code: '+error.code);
-          debugLog(error, 'Signal received: '+error.signal);
-        }
-        debugLog(info, 'Child Process STDOUT: '+stdout);
-        debugLog(info, 'Child Process STDERR: '+stderr);
-      });
+
+    if (rec.postStopCommand) {
+        runCommand(opt, cam, rec, rec.PostStopCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
     }
-  }
 }
 
 function stopImage(opt,cam,rec) {
@@ -209,8 +227,7 @@ function stopImage(opt,cam,rec) {
   }
 }
 
-
-function getDatePath() {
+function getDT(format) {
   var date = new Date();
   var hour = date.getHours();
   hour = (hour < 10 ? "0" : "") + hour;
@@ -223,44 +240,19 @@ function getDatePath() {
   month = (month < 10 ? "0" : "") + month;
   var day  = date.getDate();
   day = (day < 10 ? "0" : "") + day;
-  return year + "/" + month + "/" + day ;
-}
-
-function getDateTime() {
-  var date = new Date();
-  var hour = date.getHours();
-  hour = (hour < 10 ? "0" : "") + hour;
-  var min  = date.getMinutes();
-  min = (min < 10 ? "0" : "") + min;
-  var sec  = date.getSeconds();
-  sec = (sec < 10 ? "0" : "") + sec;
-  var year = date.getFullYear();
-  var month = date.getMonth() + 1;
-  month = (month < 10 ? "0" : "") + month;
-  var day  = date.getDate();
-  day = (day < 10 ? "0" : "") + day;
-  return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
-}
-
-function getTS() {
-  var date = new Date();
-  var hour = date.getHours();
-  hour = (hour < 10 ? "0" : "") + hour;
-  var min  = date.getMinutes();
-  min = (min < 10 ? "0" : "") + min;
-  var sec  = date.getSeconds();
-  sec = (sec < 10 ? "0" : "") + sec;
-  var year = date.getFullYear();
-  var month = date.getMonth() + 1;
-  month = (month < 10 ? "0" : "") + month;
-  var day  = date.getDate();
-  day = (day < 10 ? "0" : "") + day;
-  return year + month + day + "_" + hour + min + "_" + sec;
+  switch(format) {
+    case "path":
+      return year + "/" + month + "/" + day ;
+    case "timestamp":
+      return year + month + day + "_" + hour + min + "_" + sec;
+    case "datetime":
+      return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+  }
 }
 
 function debugLog(level, message) {
   if (level >= logLevel)
-  console.log(getTS() + ": " + message);
+  console.log(getDT('timestamp') + ": " + message);
 }
 
 function cleanUp() {
