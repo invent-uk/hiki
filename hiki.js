@@ -27,8 +27,6 @@ try {
 var rtsp=null;
 var opt=config.options;
 
-
-
 debugLog(debug, config);
 
 for (var prop in config.cameras) {
@@ -169,7 +167,7 @@ function startRecord(opt, cam, rec) {
   `rtsp://${options.user}:${options.pass}@${options.host}${options.videoPath}`
 ]);
 
-var rec.videoFilename = `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.mp4`;
+rec.videoFilename = `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.mp4`;
 rec.rtsp = spawn(opt.openRTSP, args,
   {
     cwd: opt.outputPath,
@@ -189,8 +187,6 @@ rec.rtsp = spawn(opt.openRTSP, args,
   }
 
   }
-}
-
 
 function runCommand(opt, cam, rec, command, fullPath, relativePath, filename) {
 
@@ -198,7 +194,7 @@ function runCommand(opt, cam, rec, command, fullPath, relativePath, filename) {
   command = command.replace("%r", relativePath);
   command = command.replace("%f", filename);
 
-  var pc = exec(,	function (error, stdout, stderr) {
+  var pc = exec(command,	function (error, stdout, stderr) {
     if (error) {
       debugLog(error, error.stack);
       debugLog(error, 'Error code: '+error.code);
@@ -218,6 +214,7 @@ function stopRecord(opt, cam, rec) {
     if (rec.postStopCommand) {
         runCommand(opt, cam, rec, rec.PostStopCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
     }
+  }
 }
 
 function stopImage(opt,cam,rec) {
