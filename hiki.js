@@ -179,8 +179,8 @@ rec.rtsp = spawn(opt.openRTSP, args,
   });
   debugLog(info, `Spawned RTSP child pid: ${rec.rtsp.pid}`);
   if (rec.captureImage != null && rec.captureImage == true) {
-    var imageFilename=`${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}`,'.jpg';
-    downloadImage(opt, cam, rec, imageFilename);
+    var imageFilename=`${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}`;
+    downloadImage(opt, cam, rec, imageFilename, '.jpg');
   }
   if (rec.postStartCommand) {
       runCommand(opt, cam, rec, rec.PostStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
