@@ -183,7 +183,7 @@ rec.rtsp = spawn(opt.openRTSP, args,
     downloadImage(opt, cam, rec, imageFilename, '.jpg');
   }
   if (rec.postStartCommand) {
-      runCommand(opt, cam, rec, rec.PostStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
+      runCommand(opt, cam, rec, rec.postStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
   }
 
   }
@@ -212,7 +212,7 @@ function stopRecord(opt, cam, rec) {
     rec.rtsp = null;
 
     if (rec.postStopCommand) {
-        runCommand(opt, cam, rec, rec.PostStopCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
+        runCommand(opt, cam, rec, rec.postStopCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
     }
   }
 }
