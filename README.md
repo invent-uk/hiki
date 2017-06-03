@@ -79,3 +79,9 @@ cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.jpg
 | Make          | Model            | Resolution | Issues    |
 | ------------- |-------------     | -----------| ----------|
 | Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://www.amazon.co.uk/Hikvision-DS-2CD2142FWD-External-Network-Camera/dp/B017C4CCI4)| 2688x1520 @20fps | None|
+
+
+## Contact
+
+Email to hiki@refinitive.com 
+
