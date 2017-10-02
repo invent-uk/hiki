@@ -1,2 +1,3 @@
 config.yml
-cctv/** !cctv/**/*.md
+cctv/**
+!cctv/**/*.md
