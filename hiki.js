@@ -126,7 +126,7 @@ function fetchImage(opt, cam, rec) {
       mkdirp.sync(rec.fullPath);
     }
   }
-  downloadImage(opt, cam, rec, `${rec.fullPath}`, `${cam.title}_${rec.title}_${getDT('timestamp')}`,'.jpg');
+  downloadImage(opt, cam, rec, `${rec.fullPath}`, `${cam.title}_${rec.title}_${getDT('timestamp')}`, '.jpg');
 }
 
 function downloadImage(opt, cam, rec, file_path, file_name, file_ext) {
@@ -199,8 +199,9 @@ rec.rtsp = spawn(opt.openRTSP, args,
   });
   debugLog(info, `Spawned RTSP child pid: ${rec.rtsp.pid}`);
   if (rec.captureImage != null && rec.captureImage == true) {
-    var imageFilename=`${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}`;
-    downloadImage(opt, cam, rec, imageFilename, '.jpg');
+    var imageFilePath=`${rec.fullPath}`;
+    var imageFileName=`${cam.title}_${rec.title}_${getDT('timestamp')}`;
+    downloadImage(opt, cam, rec, imageFilePath, imageFileName, '.jpg');
   }
   if (rec.postStartCommand) {
       runCommand(opt, cam, rec, rec.postStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
