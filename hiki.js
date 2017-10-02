@@ -29,23 +29,23 @@ var opt=config.options;
 
 debugLog(debug, config);
 
-for (var prop in config.cameras) {
-  if (config.cameras.hasOwnProperty(prop)) {
-    var cam = config.cameras[prop];
-    cam.title = prop;
-    for (var recTitle in cam.record) {
-      if (cam.record.hasOwnProperty(recTitle)) {
-        var rec = cam.record[recTitle];
+for (var camera in config.cameras) {
+  if (config.cameras.hasOwnProperty(camera)) {
+    var cam = config.cameras[camera];
+    cam.title = camera;
+    for (var recording in cam.record) {
+      if (cam.record.hasOwnProperty(recording)) {
+        var rec = cam.record[recording];
         if (rec.title == null) {
-          rec.title = recTitle;
+          rec.title = recording;
         }
-        if (recTitle == 'motion') {
+        if (recording == 'motion') {
           trackMotion(opt, cam, rec);
-        } else if (recTitle == 'line') {
-            trackLine(opt, cam, rec);
-        } else if (recTitle == 'constant') {
-          runSchedule(opt, cam, rec);
-        } else if (recTitle == 'image') {
+        } else if (recording == 'line') {
+          trackLine(opt, cam, rec);
+        } else if (recording == 'constant') {
+          runVideoSchedule(opt, cam, rec);
+        } else if (recording == 'image') {
           runImageSchedule(opt, cam, rec);
         }
       }
@@ -54,9 +54,8 @@ for (var prop in config.cameras) {
   }
 }
 
-
-function runSchedule(opt, cam, rec) {
-  debugLog(info, `runSchedule starting on ${cam.title}`);
+function runVideoSchedule(opt, cam, rec) {
+  debugLog(info, `runVideoSchedule starting on ${cam.title}`);
   cam.cron = new CronJob(rec.schedule, function() {
     runJob(opt, cam, rec);
   }, null, true);
@@ -85,10 +84,10 @@ function trackMotion(opt, cam, rec) {
 
     rec.hikvision.on('alarm', function(code,action,index) {
       if (code === 'VideoMotion'   && action === 'Start') {
-        debugLog(info, `Channel ${index}: Video Motion Detected`);
+        debugLog(info, `Channel ${index}: Video Motion detected`);
         startRecord(opt, cam, rec);
       } else if (code === 'VideoMotion'   && action === 'Stop') {
-        debugLog(info, `Channel ${index}: Video Motion Ended`)
+        debugLog(info, `Channel ${index}: Video Motion ended`)
         requestStopRecord(opt, cam, rec);
       }
     });
@@ -119,7 +118,6 @@ function requestStopRecord(opt, cam, rec) {
 }
 
 function fetchImage(opt, cam, rec) {
-
   var datePath = getDT('path');
   var recPath = `${opt.outputPath}/${datePath}/${cam.title}_${rec.title}`;
   if (!rec.fullPath || recPath != rec.fullPath) {
@@ -178,7 +176,6 @@ function startRecord(opt, cam, rec) {
       mkdirp.sync(rec.fullPath);
     }
   }
-
 
   var options = cam.options;
   var args = options.video_params.split(/\s+/);
@@ -272,14 +269,14 @@ function debugLog(level, message) {
 }
 
 function cleanUp() {
-  for (var prop in config.cameras) {
-    if (config.cameras.hasOwnProperty(prop)) {
-      var cam = config.cameras[prop];
-      cam.title = prop;
+  for (var camera in config.cameras) {
+    if (config.cameras.hasOwnProperty(camera)) {
+      var cam = config.cameras[camera];
+      cam.title = camera;
 
-      for (var recTitle in cam.record) {
-        if (cam.record.hasOwnProperty(recTitle)) {
-          var rec = cam.record[recTitle];
+      for (var recording in cam.record) {
+        if (cam.record.hasOwnProperty(recording)) {
+          var rec = cam.record[recording];
           stopRecord(opt, cam, rec);
           stopImage(opt, cam, rec);
         }
