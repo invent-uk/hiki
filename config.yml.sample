@@ -1,6 +1,7 @@
 options:
   outputPath: ./cctv/
   openRTSP: /usr/bin/openRTSP
+
 cameras:
   driveway:
     options:
@@ -8,17 +9,25 @@ cameras:
       port: 80
       user: admin
       pass: password123
+      # url to access stream of camera, may be different!
       videoPath: /Streaming/channels/101
-      video_params: -b 1024000 -O -s 50 -4 -H -f 20
+      # url to access snapshot of camara, may be different!
       imagePath: /Streaming/channels/1/picture
+      # parameters passed to openRTSP
+      video_params: -b 1024000 -O -s 50 -4 -H -f 20
+      # log is passed to node-hikvision-api in order to provide detailed logging
+      log: false
+
     record:
         motion:
+          # capture additonal image
           captureImage: true
+          # create a symlink to image
           symlinkImageLabel: -fanart
+          # record # more seconds after event has ended
           postDelay: 5
           #postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
           #postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
-
 
         constant:
           schedule: 0 0,30 * * * *

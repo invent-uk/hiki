@@ -41,6 +41,8 @@ for (var prop in config.cameras) {
         }
         if (recTitle == 'motion') {
           trackMotion(opt, cam, rec);
+        } else if (recTitle == 'line') {
+            trackLine(opt, cam, rec);
         } else if (recTitle == 'constant') {
           runSchedule(opt, cam, rec);
         } else if (recTitle == 'image') {
@@ -87,6 +89,23 @@ function trackMotion(opt, cam, rec) {
         startRecord(opt, cam, rec);
       } else if (code === 'VideoMotion'   && action === 'Stop') {
         debugLog(info, `Channel ${index}: Video Motion Ended`)
+        requestStopRecord(opt, cam, rec);
+      }
+    });
+  });
+}
+
+function trackLine(opt, cam, rec) {
+  debugLog(info, `trackLine starting on ${cam.title} - ${rec.title}`);
+  rec.hikvision 	= new ipcamera.hikvision(cam.options);
+  rec.hikvision.on('connect', function(){
+
+    rec.hikvision.on('alarm', function(code,action,index) {
+      if (code === 'LineDetection'   && action === 'Start') {
+        debugLog(info, `Channel ${index}: Line Crossing detected`);
+        startRecord(opt, cam, rec);
+      } else if (code === 'LineDetection'   && action === 'Stop') {
+        debugLog(info, `Channel ${index}: Line Crossing ended`)
         requestStopRecord(opt, cam, rec);
       }
     });
