@@ -1,6 +1,7 @@
 options:
   outputPath: ./cctv/
   openRTSP: /usr/bin/openRTSP
+
 cameras:
   driveway:
     options:
@@ -11,6 +12,9 @@ cameras:
       videoPath: /Streaming/channels/101
       video_params: -b 1024000 -O -s 50 -4 -H -f 20
       imagePath: /Streaming/channels/1/picture
+      # log is passed to node-hikvision-api in order to provide detailed logging
+      log: false
+
     record:
         motion:
           captureImage: true
@@ -18,7 +22,6 @@ cameras:
           postDelay: 5
           #postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
           #postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
-
 
         constant:
           schedule: 0 0,30 * * * *
