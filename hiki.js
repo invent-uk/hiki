@@ -126,30 +126,34 @@ function fetchImage(opt, cam, rec) {
       mkdirp.sync(rec.fullPath);
     }
   }
-  downloadImage(opt, cam, rec, `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}`,'.jpg');
+  downloadImage(opt, cam, rec, `${rec.fullPath}`, `${cam.title}_${rec.title}_${getDT('timestamp')}`,'.jpg');
 }
 
-function downloadImage(opt, cam, rec, name, extension) {
+function downloadImage(opt, cam, rec, file_path, file_name, file_ext) {
   if (rec.curl != null) {
     return
   };
   var options = cam.options;
   var args = [`http://${options.user}:${options.pass}@${options.host}${options.imagePath}`];
-  debugLog(info, `Spawning curl with args ${args}`);
 
+  // prepare full-qualified filenames
+  var fq_file = file_path+file_name+file_ext;
+  var fq_link = file_path+file_name+rec.symlinkImageLabel+file_ext;
+
+  debugLog(info, `Spawning curl with args ${args}`);
   rec.curl = spawn('curl', args,
   {
     cwd: opt.outputPath,
     stdio: [
       0,
-      fs.openSync(name+extension, 'w') ,
+      fs.openSync(fq_file, 'w') ,
       2
     ]
   });
   rec.curl.on('close', (code) => {
     if (code == 0) {
       if (rec.symlinkImageLabel && rec.symlinkImageLabel != "") {
-        fs.link(name+extension,name+rec.symlinkImageLabel+extension,function(){});
+        fs.link(fq_file,fq_link,function(){});
       }
     }
     rec.curl=null;
