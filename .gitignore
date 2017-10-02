@@ -1,2 +1,2 @@
 config.yml
-!cctv/README.md
+cctv/** !cctv/**/*.md
