@@ -199,7 +199,7 @@ rec.rtsp = spawn(opt.openRTSP, args,
   });
   debugLog(info, `Spawned RTSP child pid: ${rec.rtsp.pid}`);
   if (rec.captureImage != null && rec.captureImage == true) {
-    var imageFilePath=`${rec.fullPath}`;
+    var imageFilePath=`${rec.fullPath}/`;
     var imageFileName=`${cam.title}_${rec.title}_${getDT('timestamp')}`;
     downloadImage(opt, cam, rec, imageFilePath, imageFileName, '.jpg');
   }
