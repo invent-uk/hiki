@@ -26,18 +26,15 @@ cameras:
         symlinkImageLabel: -fanart
         # record # more seconds after event has ended
         postDelay: 5
-        #postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
-        #postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
+#        postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
+#        postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
 
       motion:
-        # capture additonal image
         captureImage: true
-        # create a symlink to image
         symlinkImageLabel: -fanart
-        # record # more seconds after event has ended
         postDelay: 5
-        #postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
-        #postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
+#        postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
+#        postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
 
       constant:
         schedule: 0 0,30 * * * *
