@@ -1,3 +1,4 @@
 config.yml
+docker-compose.yml
 cctv/**
 !cctv/**/*.md
