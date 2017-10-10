@@ -245,6 +245,34 @@ function stopImage(opt,cam,rec) {
   }
 }
 
+// use generic function to get filepath or filename
+function getStringByPattern(opt, cam, rec, date, pattern) {
+
+  // prepare date/time-values
+  var hour = date.getHours();
+  hour = (hour < 10 ? "0" : "") + hour;
+  var min  = date.getMinutes();
+  min = (min < 10 ? "0" : "") + min;
+  var sec  = date.getSeconds();
+  sec = (sec < 10 ? "0" : "") + sec;
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  month = (month < 10 ? "0" : "") + month;
+  var day  = date.getDate();
+  day = (day < 10 ? "0" : "") + day;
+
+  var result = pattern;
+  result = result.replace(/%Y/g, year);
+  result = result.replace(/%M/g, month);
+  result = result.replace(/%D/g, day);
+  result = result.replace(/%h/g, hour);
+  result = result.replace(/%m/g, min);
+  result = result.replace(/%s/g, sec);
+  result = result.replace(/%cam/g, cam.title);
+  result = result.replace(/%rec/g, rec.title);
+  return result;
+}
+
 function getDT(format) {
   var date = new Date();
   var hour = date.getHours();
