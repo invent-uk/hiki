@@ -116,6 +116,8 @@ function trackLine(opt, cam, rec) {
 function trackField(opt, cam, rec) {
   debugLog(info, `trackField starting on ${cam.title} - ${rec.title}`);
   rec.hikvision 	= new ipcamera.hikvision(cam.options);
+  //TODO: fielddetection is not handeled/prettified by node-hikvision-api
+  //TODO: => may be rework is needed in future
   rec.hikvision.on('connect', function(){
 
     rec.hikvision.on('alarm', function(code,action,index) {
