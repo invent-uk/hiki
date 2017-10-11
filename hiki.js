@@ -230,9 +230,9 @@ rec.rtsp = spawn(opt.openRTSP, args,
 
 function runCommand(opt, cam, rec, command, fullPath, relativePath, filename) {
 
-  command = command.replace("%p", fullPath);
-  command = command.replace("%r", relativePath);
-  command = command.replace("%f", filename);
+  command = command.replace(/%p/g, fullPath);
+  command = command.replace(/%r/g, relativePath);
+  command = command.replace(/%f/g, filename);
 
   var pc = exec(command,	function (error, stdout, stderr) {
     if (error) {
