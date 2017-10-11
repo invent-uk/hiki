@@ -44,6 +44,13 @@ cameras:
 #        postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
 #        postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
 
+      field:
+        captureImage: true
+        symlinkImageLabel: -fanart
+        postDelay: 5
+#        postStartCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStart.sh
+#        postStopCommand: /usr/bin/ssh toaserver /and/run/a/command/afterStop.sh
+
       constant:
         schedule: 0 0,30 * * * *
         captureImage: true

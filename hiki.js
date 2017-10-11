@@ -43,6 +43,8 @@ for (var camera in config.cameras) {
           trackMotion(opt, cam, rec);
         } else if (recording == 'line') {
           trackLine(opt, cam, rec);
+        } else if (recording == 'field') {
+          trackField(opt, cam, rec);
         } else if (recording == 'constant') {
           runVideoSchedule(opt, cam, rec);
         } else if (recording == 'image') {
@@ -105,6 +107,23 @@ function trackLine(opt, cam, rec) {
         startRecord(opt, cam, rec);
       } else if (code === 'LineDetection'   && action === 'Stop') {
         debugLog(info, `Channel ${index}: Line Crossing ended`)
+        requestStopRecord(opt, cam, rec);
+      }
+    });
+  });
+}
+
+function trackField(opt, cam, rec) {
+  debugLog(info, `trackField starting on ${cam.title} - ${rec.title}`);
+  rec.hikvision 	= new ipcamera.hikvision(cam.options);
+  rec.hikvision.on('connect', function(){
+
+    rec.hikvision.on('alarm', function(code,action,index) {
+      if (code === 'fielddetection'   && action === 'Start') {
+        debugLog(info, `Channel ${index}: Field Entering detected`);
+        startRecord(opt, cam, rec);
+      } else if (code === 'fielddetection'   && action === 'Stop') {
+        debugLog(info, `Channel ${index}: Field Entering ended`)
         requestStopRecord(opt, cam, rec);
       }
     });
