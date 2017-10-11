@@ -68,7 +68,7 @@ function runImageSchedule(opt, cam, rec) {
   debugLog(info, `runImageSchedule starting on ${cam.title}`);
   cam.cron = new CronJob(rec.schedule, function() {
     fetchImage(opt, cam, rec);
-  }, null, true, 'Europe/London');
+  }, null, true, 'Europe/London'); //TODO: why different from runVideoSchedule?
 }
 
 function runJob(opt, cam, rec) {
