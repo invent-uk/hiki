@@ -28,6 +28,13 @@ cameras:
 
     record:
       line:
+        # placeholders replaced in patternPath/File:
+        # %Y, %M, %D = year, month, day
+        # %h, %m, %s = hour, minute, second
+        # %cam = name of camera
+        # %rec = name of trigger
+        patternPath: "%Y/%M/%D/%cam_%rec/"
+        patternFile: "%cam_%rec_%Y%M%D_%h%m_%s"
         # capture additonal image
         captureImage: true
         # create a symlink to image

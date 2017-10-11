@@ -139,15 +139,8 @@ function requestStopRecord(opt, cam, rec) {
 }
 
 function fetchImage(opt, cam, rec) {
-  var datePath = getDT('path');
-  var recPath = `${opt.outputPath}/${datePath}/${cam.title}_${rec.title}`;
-  if (!rec.fullPath || recPath != rec.fullPath) {
-    rec.fullPath = recPath;
-    if (!fs.existsSync(rec.fullPath)) {
-      mkdirp.sync(rec.fullPath);
-    }
-  }
-  downloadImage(opt, cam, rec, `${rec.fullPath}`, `${cam.title}_${rec.title}_${getDT('timestamp')}`, '.jpg');
+  evalTarget(opt, cam, rec);
+  downloadImage(opt, cam, rec, `${rec.fullPath}`, `${rec.fileName}`, '.jpg');
 }
 
 function downloadImage(opt, cam, rec, file_path, file_name, file_ext) {
@@ -192,23 +185,15 @@ function startRecord(opt, cam, rec) {
   if (rec.rtsp != null) {
     return;
   }
-  var datePath = getDT('path');
-  var relativePath=`${datePath}/${cam.title}_${rec.title}`;
-  var recPath = `${opt.outputPath}/${relativePath}`;
-  if (!rec.fullPath || recPath != rec.fullPath) {
-    rec.fullPath = recPath;
-    if (!fs.existsSync(rec.fullPath)) {
-      mkdirp.sync(rec.fullPath);
-    }
-  }
 
+  evalTarget(opt, cam, rec);
   var options = cam.options;
   var args = options.video_params.split(/\s+/);
   args.push([
   `rtsp://${options.user}:${options.pass}@${options.host}${options.videoPath}`
 ]);
 
-rec.videoFilename = `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.mp4`;
+rec.videoFilename = `${rec.fullPath}${rec.fileName}.mp4`;
 rec.rtsp = spawn(opt.openRTSP, args,
   {
     cwd: opt.outputPath,
@@ -220,9 +205,7 @@ rec.rtsp = spawn(opt.openRTSP, args,
   });
   debugLog(info, `Spawned RTSP child pid: ${rec.rtsp.pid}`);
   if (rec.captureImage != null && rec.captureImage == true) {
-    var imageFilePath=`${rec.fullPath}/`;
-    var imageFileName=`${cam.title}_${rec.title}_${getDT('timestamp')}`;
-    downloadImage(opt, cam, rec, imageFilePath, imageFileName, '.jpg');
+    downloadImage(opt, cam, rec, `${rec.fullPath}`, `${rec.fileName}`, '.jpg');
   }
   if (rec.postStartCommand) {
       runCommand(opt, cam, rec, rec.postStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
@@ -266,9 +249,31 @@ function stopImage(opt,cam,rec) {
   }
 }
 
-// use generic function to get filepath or filename
-function getStringByPattern(opt, cam, rec, date, pattern) {
+// evaluate rec.relativePath, .fullPath, .fileName by its patterns
+function evalTarget(opt, cam, rec) {
+  var now = new Date();
 
+  // set default if patternPath not set
+  if (!rec.patternPath) {
+    rec.patternPath = "%Y/%M/%D/%cam_%rec/";
+  }
+  rec.relativePath = getStringByPattern(opt, cam, rec, now, `${rec.patternPath}`);
+  rec.fullPath = `${opt.outputPath}${rec.relativePath}`;
+
+  // set default if patternFile not set
+  if (!rec.patternFile) {
+    rec.patternFile = "%cam_%rec_%Y%M%D_%h%m_%s";
+  }
+  rec.fileName = getStringByPattern(opt, cam, rec, now, `${rec.patternFile}`);
+
+  // mkdir if necessary
+  if (!fs.existsSync(rec.fullPath)) {
+    mkdirp.sync(rec.fullPath);
+  }
+}
+
+// populate placeholders in pattern (f.e. get filepath)
+function getStringByPattern(opt, cam, rec, date, pattern) {
   // prepare date/time-values
   var hour = date.getHours();
   hour = (hour < 10 ? "0" : "") + hour;
