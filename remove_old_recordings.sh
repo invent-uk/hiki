@@ -1,6 +1,10 @@
 #!/bin/sh
 MAX_DAYS_AGO=14
 
-# remove folders including recordings older than MAX_DAYS_AGO
 # this should be run as a CronJob
-find /data/hiki/cctv/* -mindepth 1 -type d -ctime +$MAX_DAYS_AGO -exec rm -rf {} \;
+
+# remove files older than MAX_DAYS_AGO
+find /data/hiki/cctv/* -mindepth 1 -type f -ctime +$MAX_DAYS_AGO -exec rm -f {} \;
+
+# remove empty folders older than MAX_DAYS_AGO
+find /data/hiki/cctv/* -mindepth 1 -type d -ctime +$MAX_DAYS_AGO -exec rm -d {} \;
