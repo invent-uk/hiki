@@ -29,23 +29,25 @@ var opt=config.options;
 
 debugLog(debug, config);
 
-for (var prop in config.cameras) {
-  if (config.cameras.hasOwnProperty(prop)) {
-    var cam = config.cameras[prop];
-    cam.title = prop;
-    for (var recTitle in cam.record) {
-      if (cam.record.hasOwnProperty(recTitle)) {
-        var rec = cam.record[recTitle];
+for (var camera in config.cameras) {
+  if (config.cameras.hasOwnProperty(camera)) {
+    var cam = config.cameras[camera];
+    cam.title = camera;
+    for (var recording in cam.record) {
+      if (cam.record.hasOwnProperty(recording)) {
+        var rec = cam.record[recording];
         if (rec.title == null) {
-          rec.title = recTitle;
+          rec.title = recording;
         }
-        if (recTitle == 'motion') {
+        if (recording == 'motion') {
           trackMotion(opt, cam, rec);
-        } else if (recTitle == 'line') {
-            trackLine(opt, cam, rec);
-        } else if (recTitle == 'constant') {
-          runSchedule(opt, cam, rec);
-        } else if (recTitle == 'image') {
+        } else if (recording == 'line') {
+          trackLine(opt, cam, rec);
+        } else if (recording == 'field') {
+          trackField(opt, cam, rec);
+        } else if (recording == 'constant') {
+          runVideoSchedule(opt, cam, rec);
+        } else if (recording == 'image') {
           runImageSchedule(opt, cam, rec);
         }
       }
@@ -54,9 +56,8 @@ for (var prop in config.cameras) {
   }
 }
 
-
-function runSchedule(opt, cam, rec) {
-  debugLog(info, `runSchedule starting on ${cam.title}`);
+function runVideoSchedule(opt, cam, rec) {
+  debugLog(info, `runVideoSchedule starting on ${cam.title}`);
   cam.cron = new CronJob(rec.schedule, function() {
     runJob(opt, cam, rec);
   }, null, true);
@@ -67,7 +68,7 @@ function runImageSchedule(opt, cam, rec) {
   debugLog(info, `runImageSchedule starting on ${cam.title}`);
   cam.cron = new CronJob(rec.schedule, function() {
     fetchImage(opt, cam, rec);
-  }, null, true, 'Europe/London');
+  }, null, true, 'Europe/London'); //TODO: why different from runVideoSchedule?
 }
 
 function runJob(opt, cam, rec) {
@@ -85,10 +86,10 @@ function trackMotion(opt, cam, rec) {
 
     rec.hikvision.on('alarm', function(code,action,index) {
       if (code === 'VideoMotion'   && action === 'Start') {
-        debugLog(info, `Channel ${index}: Video Motion Detected`);
+        debugLog(info, `Channel ${index}: Video Motion detected`);
         startRecord(opt, cam, rec);
       } else if (code === 'VideoMotion'   && action === 'Stop') {
-        debugLog(info, `Channel ${index}: Video Motion Ended`)
+        debugLog(info, `Channel ${index}: Video Motion ended`)
         requestStopRecord(opt, cam, rec);
       }
     });
@@ -112,6 +113,25 @@ function trackLine(opt, cam, rec) {
   });
 }
 
+function trackField(opt, cam, rec) {
+  debugLog(info, `trackField starting on ${cam.title} - ${rec.title}`);
+  rec.hikvision 	= new ipcamera.hikvision(cam.options);
+  //TODO: fielddetection is not handeled/prettified by node-hikvision-api
+  //TODO: => may be rework is needed in future
+  rec.hikvision.on('connect', function(){
+
+    rec.hikvision.on('alarm', function(code,action,index) {
+      if (code === 'fielddetection'   && action === 'Start') {
+        debugLog(info, `Channel ${index}: Field Entering detected`);
+        startRecord(opt, cam, rec);
+      } else if (code === 'fielddetection'   && action === 'Stop') {
+        debugLog(info, `Channel ${index}: Field Entering ended`)
+        requestStopRecord(opt, cam, rec);
+      }
+    });
+  });
+}
+
 function requestStopRecord(opt, cam, rec) {
   rec.timeout = setTimeout(function() {
     stopRecord(opt, cam ,rec);
@@ -119,39 +139,35 @@ function requestStopRecord(opt, cam, rec) {
 }
 
 function fetchImage(opt, cam, rec) {
-
-  var datePath = getDT('path');
-  var recPath = `${opt.outputPath}/${datePath}/${cam.title}_${rec.title}`;
-  if (!rec.fullPath || recPath != rec.fullPath) {
-    rec.fullPath = recPath;
-    if (!fs.existsSync(rec.fullPath)) {
-      mkdirp.sync(rec.fullPath);
-    }
-  }
-  downloadImage(opt, cam, rec, `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}`,'.jpg');
+  evalTarget(opt, cam, rec);
+  downloadImage(opt, cam, rec, `${rec.fullPath}`, `${rec.fileName}`, '.jpg');
 }
 
-function downloadImage(opt, cam, rec, name, extension) {
+function downloadImage(opt, cam, rec, file_path, file_name, file_ext) {
   if (rec.curl != null) {
     return
   };
   var options = cam.options;
   var args = [`http://${options.user}:${options.pass}@${options.host}${options.imagePath}`];
-  debugLog(info, `Spawning curl with args ${args}`);
 
+  // prepare full-qualified filenames
+  var fq_file = file_path+file_name+file_ext;
+  var fq_link = file_path+file_name+rec.symlinkImageLabel+file_ext;
+
+  debugLog(info, `Spawning curl with args ${args}`);
   rec.curl = spawn('curl', args,
   {
     cwd: opt.outputPath,
     stdio: [
       0,
-      fs.openSync(name+extension, 'w') ,
+      fs.openSync(fq_file, 'w') ,
       2
     ]
   });
   rec.curl.on('close', (code) => {
     if (code == 0) {
       if (rec.symlinkImageLabel && rec.symlinkImageLabel != "") {
-        fs.link(name+extension,name+rec.symlinkImageLabel+extension,function(){});
+        fs.link(fq_file,fq_link,function(){});
       }
     }
     rec.curl=null;
@@ -169,24 +185,15 @@ function startRecord(opt, cam, rec) {
   if (rec.rtsp != null) {
     return;
   }
-  var datePath = getDT('path');
-  var relativePath=`${datePath}/${cam.title}_${rec.title}`;
-  var recPath = `${opt.outputPath}/${relativePath}`;
-  if (!rec.fullPath || recPath != rec.fullPath) {
-    rec.fullPath = recPath;
-    if (!fs.existsSync(rec.fullPath)) {
-      mkdirp.sync(rec.fullPath);
-    }
-  }
 
-
+  evalTarget(opt, cam, rec);
   var options = cam.options;
   var args = options.video_params.split(/\s+/);
   args.push([
   `rtsp://${options.user}:${options.pass}@${options.host}${options.videoPath}`
 ]);
 
-rec.videoFilename = `${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}.mp4`;
+rec.videoFilename = `${rec.fullPath}${rec.fileName}.mp4`;
 rec.rtsp = spawn(opt.openRTSP, args,
   {
     cwd: opt.outputPath,
@@ -198,8 +205,7 @@ rec.rtsp = spawn(opt.openRTSP, args,
   });
   debugLog(info, `Spawned RTSP child pid: ${rec.rtsp.pid}`);
   if (rec.captureImage != null && rec.captureImage == true) {
-    var imageFilename=`${rec.fullPath}/${cam.title}_${rec.title}_${getDT('timestamp')}`;
-    downloadImage(opt, cam, rec, imageFilename, '.jpg');
+    downloadImage(opt, cam, rec, `${rec.fullPath}`, `${rec.fileName}`, '.jpg');
   }
   if (rec.postStartCommand) {
       runCommand(opt, cam, rec, rec.postStartCommand, rec.fullPath, rec.relativePath, rec.videoFilename);
@@ -209,9 +215,9 @@ rec.rtsp = spawn(opt.openRTSP, args,
 
 function runCommand(opt, cam, rec, command, fullPath, relativePath, filename) {
 
-  command = command.replace("%p", fullPath);
-  command = command.replace("%r", relativePath);
-  command = command.replace("%f", filename);
+  command = command.replace(/%p/g, fullPath);
+  command = command.replace(/%r/g, relativePath);
+  command = command.replace(/%f/g, filename);
 
   var pc = exec(command,	function (error, stdout, stderr) {
     if (error) {
@@ -243,6 +249,56 @@ function stopImage(opt,cam,rec) {
   }
 }
 
+// evaluate rec.relativePath, .fullPath, .fileName by its patterns
+function evalTarget(opt, cam, rec) {
+  var now = new Date();
+
+  // set default if patternPath not set
+  if (!rec.patternPath) {
+    rec.patternPath = "%Y/%M/%D/%cam_%rec/";
+  }
+  rec.relativePath = getStringByPattern(opt, cam, rec, now, `${rec.patternPath}`);
+  rec.fullPath = `${opt.outputPath}${rec.relativePath}`;
+
+  // set default if patternFile not set
+  if (!rec.patternFile) {
+    rec.patternFile = "%cam_%rec_%Y%M%D_%h%m_%s";
+  }
+  rec.fileName = getStringByPattern(opt, cam, rec, now, `${rec.patternFile}`);
+
+  // mkdir if necessary
+  if (!fs.existsSync(rec.fullPath)) {
+    mkdirp.sync(rec.fullPath);
+  }
+}
+
+// populate placeholders in pattern (f.e. get filepath)
+function getStringByPattern(opt, cam, rec, date, pattern) {
+  // prepare date/time-values
+  var hour = date.getHours();
+  hour = (hour < 10 ? "0" : "") + hour;
+  var min  = date.getMinutes();
+  min = (min < 10 ? "0" : "") + min;
+  var sec  = date.getSeconds();
+  sec = (sec < 10 ? "0" : "") + sec;
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  month = (month < 10 ? "0" : "") + month;
+  var day  = date.getDate();
+  day = (day < 10 ? "0" : "") + day;
+
+  var result = pattern;
+  result = result.replace(/%Y/g, year);
+  result = result.replace(/%M/g, month);
+  result = result.replace(/%D/g, day);
+  result = result.replace(/%h/g, hour);
+  result = result.replace(/%m/g, min);
+  result = result.replace(/%s/g, sec);
+  result = result.replace(/%cam/g, cam.title);
+  result = result.replace(/%rec/g, rec.title);
+  return result;
+}
+
 function getDT(format) {
   var date = new Date();
   var hour = date.getHours();
@@ -272,14 +328,14 @@ function debugLog(level, message) {
 }
 
 function cleanUp() {
-  for (var prop in config.cameras) {
-    if (config.cameras.hasOwnProperty(prop)) {
-      var cam = config.cameras[prop];
-      cam.title = prop;
+  for (var camera in config.cameras) {
+    if (config.cameras.hasOwnProperty(camera)) {
+      var cam = config.cameras[camera];
+      cam.title = camera;
 
-      for (var recTitle in cam.record) {
-        if (cam.record.hasOwnProperty(recTitle)) {
-          var rec = cam.record[recTitle];
+      for (var recording in cam.record) {
+        if (cam.record.hasOwnProperty(recording)) {
+          var rec = cam.record[recording];
           stopRecord(opt, cam, rec);
           stopImage(opt, cam, rec);
         }

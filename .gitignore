@@ -1,2 +1,4 @@
 config.yml
-!cctv/README.md
+docker-compose.yml
+cctv/**
+!cctv/**/*.md
