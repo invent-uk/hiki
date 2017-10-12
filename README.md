@@ -76,12 +76,12 @@ cctv/2017/05/18/driveway_motion/driveway_motion_20170518_2156_01.jpg
 
 ## Supported cameras
 
-| Make          | Model            | Resolution | Issues    |
-| ------------- |-------------     | -----------| ----------|
-| Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://goo.gl/NKIcwE)| 2688x1520 @20fps | None|
+| Make          | Model            | Resolution | Issues    | Remarks    |
+| ------------- |-------------     | -----------| ----------| ---------- |
+| Hikvision     | DS-2CD2142FWD-IS [(Amazon)](https://goo.gl/NKIcwE)| 2688x1520 @20fps | None||
+| Hikvision     | DS-2CD2032-I | 1920x1080 @25fps | None|Reflashed Trendnet TV-IP311PI|
 
 
 ## Contact
 
-Email to hiki@refinitive.com 
-
+Email to hiki@refinitive.com
